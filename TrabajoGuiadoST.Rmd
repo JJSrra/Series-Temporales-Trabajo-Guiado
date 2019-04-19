@@ -1,0 +1,46 @@
+---
+title: 'Series Temporales: Trabajo Guiado'
+author: "Juanjo Sierra"
+date: "19 de abril de 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Paquetes a cargar
+
+Importamos los paquetes que necesitamos para resolver los problemas planteados para la práctica.
+
+```{r}
+library(tseries)
+```
+
+
+## Problema
+
+Dadas las cifras de pasajeros que vuelan con una aerolínea por año (en miles, anotadas mensualmente) entre los años 1949 y 1959, se pide estimar la cantidad de pasajeros que esa misma aerolínea tendrá cada mes durante el año 1960.
+
+Se leen los datos de los pasajeros que nos proporciona la aerolínea.
+
+```{r}
+serie = scan("Datos/pasajeros_1949_1959.dat")
+```
+
+Defino el número de datos que quiero usar para test y para predecir.
+
+```{r}
+nTest = 12
+nPred = 12
+```
+
+Creo el objeto "Serie temporal" con la librería `tseries` y su función `ts`. La frecuencia será 12 porque suponemos que la estacionalidad es anual. Utilizando la función `plot` junto a `descompose` se pueden ver la tendencia, la estacionalidad y lo que queda de la serie una vez eliminadas la tendencia y la estacionalidad.
+
+```{r}
+serie.ts = ts(serie, frequency=12)
+plot(decompose(serie.ts))
+```
+
+
+
