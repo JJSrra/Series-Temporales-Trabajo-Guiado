@@ -42,5 +42,28 @@ serie.ts = ts(serie, frequency=12)
 plot(decompose(serie.ts))
 ```
 
+Vamos a construir la serie logarítmica (tanto el objeto ts como la serie original) para tratar de reducir la varianza en la serie resultante de restar la tendencia y estacionalidad. Buscamos que la serie sea estacionaria, y eso implica que no varíe ni en media ni en varianza.
 
+```{r}
+serie.ts.log = log(serie.ts)
+serie.log = log(serie)
+plot(decompose(serie.ts.log))
+```
+
+Vamos a seleccionar los datos de train y test del problema, entendiendo test como validación previa a la predicción del año 1960.
+
+```{r}
+serie.train = serie.log[1:(length(serie.log) - nTest)]
+tiempo.train = 1:length(serie.train)
+
+serie.test = serie.log[(length(serie.log) - nTest+1):length(serie.log)]
+tiempo.test = (length(serie.train)+1):length(serie.log)
+```
+
+A continuación los mostramos en una gráfica, resaltando en rojo los datos que se están tomando como test.
+
+```{r}
+plot.ts(serie.train, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, serie.test, col="red")
+```
 
