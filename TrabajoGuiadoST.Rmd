@@ -128,13 +128,17 @@ Aquí se pueden observar los 12 valores que definen la estacionalidad. Para elim
 
 ```{r}
 # Aprovecho el reciclaje de R para no tener que crear una variable auxiliar
-serie.train.sinTendEst = serie.train.sinTend - estacionalidad
-serie.test.sinTendEst = serie.test.sinTend - estacionalidad
+serie.train.sinTendSinEst = serie.train.sinTend - estacionalidad
+serie.test.sinTendSinEst = serie.test.sinTend - estacionalidad
 
-plot.ts(serie.train.sinTendEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
-lines(tiempo.test, serie.test.sinTendEst, col="red")
+plot.ts(serie.train.sinTendSinEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, serie.test.sinTendSinEst, col="red")
 ```
 
-Aquí se puede observar ya limpiamente la serie temporal sin la tendencia y sin la estacionalidad.
+Aquí se puede observar ya limpiamente la serie temporal sin la tendencia y sin la estacionalidad. El siguiente paso es comprobar si la serie es o no estacionaria.
+
+```{r}
+acf(serie.train.sinTendSinEst)
+```
 
 
