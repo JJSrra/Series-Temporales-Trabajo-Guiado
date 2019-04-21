@@ -95,4 +95,46 @@ JB.train
 JB.test
 ```
 
-Como el p-value resultante del test de Jarque Bera es superior a 0.05 no se puede afirmar con suficiente confianza que los datos no sigan una distribución normal, por lo que consideramos normales los residuos del modelo lineal para train y para test.
+Como el p-value resultante del test de Jarque Bera es superior a 0.05 no se puede afirmar con suficiente confianza que los residuos no sigan una distribución normal, por lo que consideramos normales los errores del modelo lineal para train y para test.
+
+A continuación vamos a comparar las medias del error, para comprobar si el error que se produce en la parte de train es similar al que ocurre en la parte de test. Para ello utilizamos el test de Student.
+
+```{r}
+TT = t.test(c(parametros.H1$residuals, tendencia.test.H1-serie.test))
+TT
+```
+
+El test de Student indica que la media de los errores es casi 0 (0.0073), y el p-value por encima de 0.05 indica que no hay una desviación significativa con respecto a esta media. Por esto, se puede considerar que no hay una diferencia estructural que invalide el modelo lineal en este caso.
+
+El siguiente paso es eliminar la tendencia de la serie inicial, tanto en entrenamiento como en test. Y comprobamos en una gráfica qué aspecto tiene la serie sin esta tendencia.
+
+```{r}
+serie.train.sinTend = serie.train - tendencia.train.H1
+serie.test.sinTend = serie.test - tendencia.test.H1
+
+plot.ts(serie.train.sinTend, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, serie.test.sinTend, col="red")
+```
+
+Una vez hecho esto, procedemos a eliminar la estacionalidad de la serie resultante. Inicialmente asumimos una estacionalidad de 12 valores (anual).
+
+```{r}
+k = 12
+estacionalidad = decompose(serie.ts.log)$seasonal[1:k]
+estacionalidad
+```
+
+Aquí se pueden observar los 12 valores que definen la estacionalidad. Para eliminar la estacionalidad de nuestra serie hay que ir eliminando estos 12 valores de forma periódica a lo largo de la serie.
+
+```{r}
+# Aprovecho el reciclaje de R para no tener que crear una variable auxiliar
+serie.train.sinTendEst = serie.train.sinTend - estacionalidad
+serie.test.sinTendEst = serie.test.sinTend - estacionalidad
+
+plot.ts(serie.train.sinTendEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, serie.test.sinTendEst, col="red")
+```
+
+Aquí se puede observar ya limpiamente la serie temporal sin la tendencia y sin la estacionalidad.
+
+
