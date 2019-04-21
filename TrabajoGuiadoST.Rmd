@@ -208,3 +208,35 @@ lines(tiempo.test, valoresPredichos, col="green")
 
 Como se observa en la gráfica, los valores reconstruidos sí que se ajustan bastante bien a los datos de train, pero sin embargo la predicción de test es demasiado genérica y no se ajusta muy bien.
 
+Si volvemos a fijarnos en las gráficas de ACF y PACF que teníamos anteriormente, se puede observar que los valores que salen del umbral (a excepción del valor 0 de la gráfica ACF) son muy cercanos a estos límites del 0, por lo que podríamos decir que la serie es casi ruido blanco, y es por eso por lo que aparece esta predicción tan genérica.
+
+Para comprobar que el modelo es válido vamos a estudiar los errores de dicho modelo con varios tests estadísticos. Primero utilizamos el test de Box-Pierce que los residuos que quedan del modelo son aleatorios.
+
+```{r}
+boxPierce.test = Box.test(modelo$residuals)
+boxPierce.test
+```
+
+El test de Box-Pierce refleja la confianza en que los residuos no sean aleatorios. En este caso obtenemos una confianza de apenas el 6% así que negamos la hipótesis nula y afirmamos que los residuos del modelo siguen una distribución aleatoria.
+
+El siguiente test será el de Jarque Bera y el de Shapiro-Wilk para valorar la normalidad de los residuos.
+
+```{r}
+jarqueBera.test = jarque.bera.test(modelo$residuals)
+jarqueBera.test
+
+shapiroWilk.test = shapiro.test(modelo$residuals)
+shapiroWilk.test
+```
+
+Según ambos tests podemos afirmar que los errores siguen una distribución normal, ya que la hipótesis nula propone que los datos no sigan dicha distribución.
+
+A continuación podemos mostrar un histograma de los residuos de este modelo para apoyarnos en un recurso gráfico.
+
+```{r}
+hist(modelo$residuals, col="blue", prob=TRUE, ylim=c(0,20), xlim=c(-0.2,0.2))
+lines(density(modelo$residuals))
+```
+
+En esta representación se puede apreciar que los residuos siguen una distribución normal con media 0, y que por tanto las afirmaciones que hemos hecho basándonos en los tests estadísticos son ciertos y hemos terminado de validar el modelo ARIMA(4,1,0) que nos ha llevado hasta aquí.
+
