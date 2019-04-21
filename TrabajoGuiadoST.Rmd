@@ -165,6 +165,46 @@ acf(serie.train.sinTendSinEstDif)
 pacf(serie.train.sinTendSinEstDif)
 ```
 
+Las gráficas ACF y PACF parecen típicas de un modelo autorregresivo de grado 4 (el valor más alto del PACF que queda fuera del umbral).
 
+Podemos asumir un modelo AR(4), y como hemos diferenciado solamente un instante de tiempo (solamente hemos aplicado la función `diff` una vez) podemos aplicar un modelo ARIMA(4,1,0) sobre la serie sin tendencia ni estacionalidad (la diferenciación se aplica dentro del modelo).
 
+```{r}
+modelo = arima(serie.train.sinTendSinEst, order = c(4,1,0))
+```
+
+Como es un modelo autorregresivo, los valores ajustados del modelo salen como los residuos del modelo que acabamos de ajustar más la serie.
+
+```{r}
+valoresReconstruidos = serie.train.sinTendSinEst + modelo$residuals
+```
+
+Para hacer una predicción llamamos a la función `predict` e indicamos cuántos valores queremos predecir. Primero predeciremos la parte del test y comprobaremos que funciona bien con los valores que conocemos (forman parte de la serie inicial que se nos dio).
+
+```{r}
+predicciones = predict(modelo, n.ahead = nPred)
+valoresPredichos = predicciones$pred
+valoresPredichos
+```
+
+Podemos observar que el modelo ha predicho los 12 datos que le hemos pedido (los que equivaldrían al conjunto de test que hemos extraído de la serie inicial). Ahora toca comprobar cómo de bien se ajustan esos datos a los reales de test, calculando el error cuadrático acumulado.
+
+```{r}
+error.train = sum(modelo$residuals^2)
+error.train
+
+error.test = sum((valoresPredichos-serie.test.sinTendSinEst)^2)
+error.test
+```
+
+Vamos a ilustrar las predicciones en la misma gráfica que los datos reales, para comprobar cómo se ajustan.
+
+```{r}
+plot.ts(serie.train.sinTendSinEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(valoresReconstruidos, col="blue")
+lines(tiempo.test, serie.test.sinTendSinEst, col="red")
+lines(tiempo.test, valoresPredichos, col="green")
+```
+
+Como se observa en la gráfica, los valores reconstruidos sí que se ajustan bastante bien a los datos de train, pero sin embargo la predicción de test es demasiado genérica y no se ajusta muy bien.
 
