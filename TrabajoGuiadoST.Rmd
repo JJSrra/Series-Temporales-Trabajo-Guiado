@@ -67,3 +67,32 @@ plot.ts(serie.train, xlim=c(1, tiempo.test[length(tiempo.test)]))
 lines(tiempo.test, serie.test, col="red")
 ```
 
+Lo siguiente que se va a hacer es estimar la tendencia. Se va a utilizar un modelo lineal en principio dado que por el aspecto de la serie temporal da la sensación de que puede generalizar bien.
+
+```{r}
+parametros.H1 = lm(serie.train ~ tiempo.train)
+
+tendencia.train.H1 = parametros.H1$coefficients[1]+tiempo.train*parametros.H1$coefficients[2]
+tendencia.test.H1 = parametros.H1$coefficients[1]+tiempo.test*parametros.H1$coefficients[2]
+```
+
+Y a continuación, mostramos la tendencia estimada en la misma gráfica que la serie temporal, para comprobar cómo se ajusta.
+
+```{r}
+plot.ts(serie.train, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, serie.test, col="red")
+lines(tiempo.train, tendencia.train.H1, col="blue")
+lines(tiempo.test, tendencia.test.H1, col="green")
+```
+
+Vamos a validar que el modelo es correcto, para apoyarnos en algo más que una hipótesis. Utilizaremos el test de Jarque Bera sobre los residuos que han quedado de generar el modelo lineal y los que quedan en el test.
+
+```{r}
+JB.train = jarque.bera.test(parametros.H1$residuals)
+JB.test = jarque.bera.test(tendencia.test.H1-serie.test)
+
+JB.train
+JB.test
+```
+
+Como el p-value resultante del test de Jarque Bera es superior a 0.05 no se puede afirmar con suficiente confianza que los datos no sigan una distribución normal, por lo que consideramos normales los residuos del modelo lineal para train y para test.
