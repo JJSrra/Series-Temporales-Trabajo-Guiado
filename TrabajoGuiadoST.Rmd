@@ -240,3 +240,29 @@ lines(density(modelo$residuals))
 
 En esta representación se puede apreciar que los residuos siguen una distribución normal con media 0, y que por tanto las afirmaciones que hemos hecho basándonos en los tests estadísticos son ciertos y hemos terminado de validar el modelo ARIMA(4,1,0) que nos ha llevado hasta aquí.
 
+El siguiente paso es deshacer los cambios para predecir los valores del año 1960. Es decir, al modelo resultante (que no tiene estacionalidad ni tendencia) hay que sumarle los valores que le hemos sustraído previamente para que se tengan en cuenta a la hora de predecir.
+
+```{r}
+# Sumamos estacionalidad
+# De nuevo aprovecho el reciclaje de R
+valoresReconstruidos.Est = valoresReconstruidos + estacionalidad
+valoresPredichos.Est = valoresPredichos + estacionalidad
+
+# Sumamos tendencia
+valoresReconstruidos.EstTend = valoresReconstruidos.Est + tendencia.train.H1
+valoresPredichos.EstTend = valoresPredichos.Est + tendencia.test.H1
+
+# Deshacemos transformación logarítmica
+valoresReconstruidos.EstTendExp = exp(valoresReconstruidos.EstTend)
+valoresPredichos.EstTendExp = exp(valoresPredichos.EstTend)
+```
+
+Ahora que ya tenemos los valores del modelo con los cambios deshechos, podemos mostrarlos en una nueva gráfica y comprobar cómo de bien se adaptan a los datos reales de la serie.
+
+```{r}
+plot.ts(serie)
+lines(tiempo.train, valoresReconstruidos.EstTendExp, col="blue")
+lines(tiempo.test, valoresPredichos.EstTendExp, col="green")
+```
+
+Como vemos, el modelo resulta bastante acertado, y recoge de forma adecuada los altibajos propios de la serie temporal en el año de test.
