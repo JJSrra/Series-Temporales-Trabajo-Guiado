@@ -135,10 +135,36 @@ plot.ts(serie.train.sinTendSinEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
 lines(tiempo.test, serie.test.sinTendSinEst, col="red")
 ```
 
-Aquí se puede observar ya limpiamente la serie temporal sin la tendencia y sin la estacionalidad. El siguiente paso es comprobar si la serie es o no estacionaria.
+Aquí se puede observar ya limpiamente la serie temporal sin la tendencia y sin la estacionalidad. El siguiente paso es comprobar si la serie es o no estacionaria. Podemos comenzar por un test ACF.
 
 ```{r}
 acf(serie.train.sinTendSinEst)
 ```
+
+Como no se puede observar claramente que sea estacionaria vamos a hacer el test de Dickey-Fuller aumentado para asegurarnos.
+
+```{r}
+adf.serie.train = adf.test(serie.train.sinTendSinEst)
+adf.serie.train
+```
+
+El p-value es 0.64, por lo que al buscar una confianza del 95% no se puede asegurar que la serie sea estacionaria. Lo normal es que la serie no sea estacionaria en media, para hacerla estacionaria vamos a diferenciarla. Cuando lo hayamos hecho volveremos a pasarle el test.
+
+```{r}
+serie.train.sinTendSinEstDif = diff(serie.train.sinTendSinEst)
+serie.test.sinTendSinEstDif = diff(serie.test.sinTendSinEst)
+
+adf.serie.train.2 = adf.test(serie.train.sinTendSinEstDif)
+adf.serie.train.2
+```
+
+Ahora que el p-value se encuentra por debajo de 0.05 sí que se puede asumir que la serie es estacionaria. Si comprobamos con un nuevo test ACF y un test PACF las gráficas resultantes de esta serie obtenemos algo que encaja mucho más con una serie estacionaria.
+
+```{r}
+acf(serie.train.sinTendSinEstDif)
+pacf(serie.train.sinTendSinEstDif)
+```
+
+
 
 
