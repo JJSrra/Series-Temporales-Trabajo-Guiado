@@ -314,4 +314,35 @@ plot.ts(serie.train.sinTendSinEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
 lines(tiempo.test, valoresPredichos, col="red")
 ```
 
+Por último toca deshacer las transformaciones para ver las predicciones reales sobre los datos de la serie sin modificar.
 
+```{r}
+# Sumamos estacionalidad
+# De nuevo aprovecho el reciclaje de R
+valoresPredichos.Est = valoresPredichos + estacionalidad
+
+# Sumamos tendencia
+valoresPredichos.EstTend = valoresPredichos.Est + tendencia.test.H1
+
+# Deshacemos transformación logarítmica
+valoresPredichos.EstTendExp = exp(valoresPredichos.EstTend)
+```
+
+Por último, mostramos los resultados en una nueva gráfica junto a los datos de train con los que hemos trabajado.
+
+```{r}
+plot.ts(serie, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, valoresPredichos.EstTendExp, col="red")
+```
+
+En principio parece que los datos tienen un aspecto similar a los que se esperan según la tendencia de la serie temporal de entrenamiento. Pero para comprobar el acierto vamos ahora a leer los datos de predicción (los reales de 1960) y estudiar el error cometido. Además se mostrarán en color azul junto a la predicción (en rojo) en una gráfica similar a la anterior.
+
+```{r}
+serie.1960 = scan("Datos/pasajeros_1960.predict")
+
+plot.ts(serie, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, serie.1960, col="blue")
+lines(tiempo.test, valoresPredichos.EstTendExp, col="red")
+```
+
+Las predicciones que hemos realizado con el modelo se aproximan bastante bien a los datos reales del problema como puede observarse en la gráfica. Pese a que en algunos puntos la línea roja (valores predichos) está un poco por encima de la línea azul, en general la aproximación es bastante buena.
