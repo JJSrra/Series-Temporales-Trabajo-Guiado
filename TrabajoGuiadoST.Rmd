@@ -266,3 +266,52 @@ lines(tiempo.test, valoresPredichos.EstTendExp, col="green")
 ```
 
 Como vemos, el modelo resulta bastante acertado, y recoge de forma adecuada los altibajos propios de la serie temporal en el año de test.
+
+Ahora toca predecir el año 1960 utilizando el resto de los datos como train. Para esto vamos a utilizar la serie logarítmica `serie.log` como train.
+
+```{r}
+serie.train = serie.log
+tiempo.train = 1:length(serie.log)
+tiempo.test = (length(tiempo.train)+1):(length(tiempo.train)+nPred)
+```
+
+Estimamos la nueva tendencia, ahora con todos los datos.
+
+```{r}
+parametros.H1 = lm(serie.train ~ tiempo.train)
+
+tendencia.train.H1 = parametros.H1$coefficients[1]+tiempo.train*parametros.H1$coefficients[2]
+tendencia.test.H1 = parametros.H1$coefficients[1]+tiempo.test*parametros.H1$coefficients[2]
+```
+
+Una vez obtenida la nueva tendencia, eliminamos dicha tendencia para pasar a tener la siguiente serie.
+
+```{r}
+serie.train.sinTend = serie.train - tendencia.train.H1
+plot.ts(serie.train.sinTend, xlim=c(1, tiempo.train[length(tiempo.train)]))
+```
+
+Ahora que tenemos la serie sin tendencia, toca quitarle la estacionalidad para dejarla en formato estacionaria. La estacionalidad es la misma que antes por lo que no requiere que la editemos.
+
+```{r}
+serie.train.sinTendSinEst = serie.train.sinTend - estacionalidad
+plot.ts(serie.train.sinTendSinEst, xlim=c(1, tiempo.train[length(tiempo.train)]))
+```
+
+Una vez conseguida esta serie estacionaria, volvemos a calcular un modelo ARIMA con los parámetros que nos funcionaron en el caso anterior. Este modelo se usará para predecir los nuevos datos de 1960.
+
+```{r}
+modelo = arima(serie.train.sinTendSinEst, order = c(4,1,0))
+```
+
+Con el modelo construido predecimos los nuevos datos, un total de 12 (para ocupar todo el año), y las vamos a mostrar junto al resto de la serie, la parte conocida.
+
+```{r}
+predicciones = predict(modelo, n.ahead = nPred)
+valoresPredichos = predicciones$pred
+
+plot.ts(serie.train.sinTendSinEst, xlim=c(1, tiempo.test[length(tiempo.test)]))
+lines(tiempo.test, valoresPredichos, col="red")
+```
+
+
